@@ -4,6 +4,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AssistantsModule } from './assistants/assistants.module';
+import { BranchesModule } from './branches/branches.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -11,6 +12,7 @@ import { AssistantsModule } from './assistants/assistants.module';
     AuthModule,
     UsersModule,
     AssistantsModule,
+    BranchesModule,
   ],
   controllers: [],
   providers: [],

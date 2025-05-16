@@ -1,11 +1,15 @@
 import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class CreateAssistantDto {
+export class CreateBranchDto {
   @IsNotEmpty()
   @IsString()
-  assistantId: string;
+  name: string;
+
+  @IsNotEmpty()
+  @IsString()
+  address: string;
 
   @IsOptional()
   @IsUUID()
-  usuarioId?: string;
+  assistantId?: string;
 }

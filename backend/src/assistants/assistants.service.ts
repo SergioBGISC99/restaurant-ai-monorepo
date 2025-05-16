@@ -17,7 +17,7 @@ export class AssistantsService {
     return this.prisma.assistant.create({
       data: {
         assistantId: dto.assistantId,
-        usuarioId: dto.usuarioId,
+        userId: dto.usuarioId,
       },
     });
   }
@@ -25,7 +25,7 @@ export class AssistantsService {
   async findAll() {
     return this.prisma.assistant.findMany({
       include: {
-        usuario: {
+        user: {
           select: {
             id: true,
             name: true,
