@@ -55,4 +55,11 @@ export class BranchesController {
     const userId = req.user.sub;
     return this.branchesService.generateQr(id, userId);
   }
+  
+  @Get(':id/web-qr')
+  @Roles('CLIENTE')
+  generateWebQr(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
+    const userId = req.user.sub;
+    return this.branchesService.generateQr(id, userId);
+  }
 }
