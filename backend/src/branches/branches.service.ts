@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
+import { QrService } from 'src/qr/qr.service';
 
 interface CreateBranchWithUserId extends CreateBranchDto {
   userId: string;
@@ -8,7 +9,10 @@ interface CreateBranchWithUserId extends CreateBranchDto {
 
 @Injectable()
 export class BranchesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private qrService: QrService,
+  ) {}
 
   create(dto: CreateBranchWithUserId) {
     return this.prisma.branch.create({
@@ -37,6 +41,22 @@ export class BranchesService {
         assistant: true,
       },
     });
+  }
+
+  async generateQr(branchId: string, userId: string) {
+    const branch = await this.prisma.branch.findUnique({
+      where: { id: branchId },
+    });
+
+    if (!branch || branch.userId !== userId) {
+      throw new ForbiddenException('No autorizado para esta sucursal');
+    }
+
+    const url = 'https://wa.me/526442194553';
+    const fileName = `qr-${branchId}`;
+
+    const qrPath = await this.qrService.generateQrWithLogo(url, fileName);
+    return { qr: qrPath };
   }
 
   async assignAssistant(branchId: string, assistantId: string) {

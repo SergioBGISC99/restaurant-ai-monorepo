@@ -24,7 +24,7 @@ export class BranchesController {
   @Roles('CLIENTE')
   create(@Body() dto: CreateBranchDto, @Req() req: any) {
     const userId = req.user.sub;
-    return this.branchesService.create({...dto, userId});
+    return this.branchesService.create({ ...dto, userId });
   }
 
   @Get()
@@ -47,5 +47,12 @@ export class BranchesController {
   getMyBranches(@Req() req: any) {
     const userId = req.user.sub;
     return this.branchesService.findByUser(userId);
+  }
+
+  @Get(':id/qr')
+  @Roles('CLIENTE')
+  generateQr(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
+    const userId = req.user.sub;
+    return this.branchesService.generateQr(id, userId);
   }
 }

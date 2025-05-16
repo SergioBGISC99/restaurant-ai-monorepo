@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAssistantDto } from './dto/create-assistant.dto';
 
@@ -33,6 +38,27 @@ export class AssistantsService {
           },
         },
       },
+    });
+  }
+
+  async assingToUser(assistantId: string, userId: string) {
+    const assistant = await this.prisma.assistant.findUnique({
+      where: { id: assistantId },
+    });
+
+    if (!assistant) throw new NotFoundException('Asistente no encontrado');
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || user.role !== 'CLIENTE') {
+      throw new BadRequestException('Usuario inválido');
+    }
+
+    return this.prisma.assistant.update({
+      where: { id: assistantId },
+      data: { userId },
     });
   }
 }
