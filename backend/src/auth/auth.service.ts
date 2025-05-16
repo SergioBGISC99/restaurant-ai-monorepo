@@ -37,6 +37,9 @@ export class AuthService {
   async login(data: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
+      include: {
+        assistant: true,
+      },
     });
 
     if (!user) throw new UnauthorizedException('Credenciales incorrectas');
@@ -44,7 +47,16 @@ export class AuthService {
     const valid = bcryptAdapter.compare(data.password, user.password);
     if (!valid) throw new UnauthorizedException('Credenciales incorrectas');
 
-    return this.signToken(user.id, user.email, user.role);
+    return {
+      accessToken: this.signToken(user.id, user.email, user.role),
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        assistant: user.assistant,
+      },
+    };
   }
 
   private signToken(userId: string, email: string, role: Role) {
