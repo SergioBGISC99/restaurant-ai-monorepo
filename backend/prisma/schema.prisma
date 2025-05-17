@@ -38,12 +38,52 @@ model Branch {
     userId      String
     assistant   Assistant? @relation(fields: [assistantId], references: [id])
     assistantId String?
+    product     Product[]
+    order       Order[]
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
+}
+
+model Product {
+    id        String      @id @default(uuid())
+    name      String
+    price     Float
+    branch    Branch      @relation(fields: [branchId], references: [id])
+    branchId  String
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+    orderItem OrderItem[]
+}
+
+model Order {
+    id        String      @id @default(uuid())
+    branch    Branch      @relation(fields: [branchId], references: [id])
+    branchId  String
+    userPhone String
+    userName  String
+    items     OrderItem[]
+    status    OrderStatus @default(PENDING)
+    createdAt DateTime    @default(now())
+}
+
+model OrderItem {
+    id        String  @id @default(uuid())
+    order     Order   @relation(fields: [orderId], references: [id])
+    orderId   String
+    product   Product @relation(fields: [productId], references: [id])
+    productId String
+    quantity  Int
 }
 
 enum Role {
     ADMIN
     CLIENTE
     USUARIO
+}
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    PAID
+    CANCELLED
 }
