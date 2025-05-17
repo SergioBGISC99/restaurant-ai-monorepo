@@ -7,6 +7,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
+import * as fs from 'fs';
+// import * as csvParser from 'csv-parser';
+import csvParser = require('csv-parser');
+
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
@@ -65,6 +69,49 @@ export class ProductsService {
     return this.prisma.product.update({
       where: { id },
       data: { isActive: true },
+    });
+  }
+
+  async importFromCsv(path: string, branchId: string, userId: string) {
+    const branch = await this.prisma.branch.findUnique({
+      where: { id: branchId },
+    });
+
+    if (!branch || branch.userId !== userId) {
+      throw new ForbiddenException(
+        'No autorizado para importar en esta sucursal',
+      );
+    }
+
+    const results: { name: string; price: number }[] = [];
+
+    return new Promise((resolve, reject) => {
+      fs.createReadStream(path)
+        .pipe(csvParser())
+        .on('data', (data) => {
+          if (data.name && data.price) {
+            results.push({
+              name: data.name,
+              price: parseFloat(data.price),
+            });
+          }
+        })
+        .on('end', () => {
+          (async () => {
+            try {
+              const created = await this.prisma.product.createMany({
+                data: results.map((p) => ({ ...p, branchId })),
+                skipDuplicates: true,
+              });
+              resolve({ count: created.count });
+            } catch (err) {
+              reject(new Error(err));
+            } finally {
+              fs.unlinkSync(path);
+            }
+          })();
+        })
+        .on('error', (err) => reject(new Error(err.message)));
     });
   }
 }
