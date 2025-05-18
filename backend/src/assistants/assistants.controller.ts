@@ -21,19 +21,19 @@ export class AssistantsController {
   constructor(private readonly assistantsService: AssistantsService) {}
 
   @Post()
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   create(@Body() dto: CreateAssistantDto) {
     return this.assistantsService.create(dto);
   }
 
   @Get()
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   findAll() {
     return this.assistantsService.findAll();
   }
 
   @Put(':id/assign-user')
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   assignToUser(
     @Param('id', ParseUUIDPipe) asistenteId: string,
     @Body() dto: AssignUserDto,

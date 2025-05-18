@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAssistantDto } from './dto/create-assistant.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AssistantsService {
@@ -52,7 +53,7 @@ export class AssistantsService {
       where: { id: userId },
     });
 
-    if (!user || user.role !== 'CLIENTE') {
+    if (!user || user.role !== Role.CLIENTE) {
       throw new BadRequestException('Usuario inválido');
     }
 

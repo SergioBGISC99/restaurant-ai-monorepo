@@ -21,6 +21,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Role } from '@prisma/client';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('products')
@@ -28,19 +29,19 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @Roles('CLIENTE')
+  @Roles(Role.CLIENTE)
   create(@Body() dto: CreateProductDto, @Req() req: any) {
     return this.productsService.create(dto, req.user.sub);
   }
 
   @Get('branch/:id')
-  @Roles('ADMIN', 'CLIENTE')
+  @Roles(Role.ADMIN, Role.CLIENTE)
   findAll(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.findAll(id);
   }
 
   @Patch(':id')
-  @Roles('CLIENTE')
+  @Roles(Role.CLIENTE)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateProductDto,
@@ -50,7 +51,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @Roles('CLIENTE')
+  @Roles(Role.CLIENTE)
   remove(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
     return this.productsService.remove(id, req.user.sub);
   }

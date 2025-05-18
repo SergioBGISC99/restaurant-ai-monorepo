@@ -14,6 +14,7 @@ import { RolesGuard } from 'src/auth/guards/role.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CreateBranchDto } from './dto/create-branch.dto';
+import { Role } from '@prisma/client';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('branches')
@@ -21,20 +22,20 @@ export class BranchesController {
   constructor(private readonly branchesService: BranchesService) {}
 
   @Post()
-  @Roles('CLIENTE')
+  @Roles(Role.CLIENTE)
   create(@Body() dto: CreateBranchDto, @Req() req: any) {
     const userId = req.user.sub;
     return this.branchesService.create({ ...dto, userId });
   }
 
   @Get()
-  @Roles('ADMIN', 'CLIENTE')
+  @Roles(Role.ADMIN, Role.CLIENTE)
   findAll() {
     return this.branchesService.findAll();
   }
 
   @Put(':id/assistant')
-  @Roles('CLIENTE')
+  @Roles(Role.CLIENTE)
   assignAssistant(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('assistantId', ParseUUIDPipe) assistantId: string,
@@ -43,21 +44,21 @@ export class BranchesController {
   }
 
   @Get('mine')
-  @Roles('CLIENTE')
+  @Roles(Role.CLIENTE)
   getMyBranches(@Req() req: any) {
     const userId = req.user.sub;
     return this.branchesService.findByUser(userId);
   }
 
   @Get(':id/qr')
-  @Roles('CLIENTE')
+  @Roles(Role.CLIENTE)
   generateQr(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
     const userId = req.user.sub;
     return this.branchesService.generateQr(id, userId);
   }
   
   @Get(':id/web-qr')
-  @Roles('CLIENTE')
+  @Roles(Role.CLIENTE)
   generateWebQr(@Param('id', ParseUUIDPipe) id: string, @Req() req: any) {
     const userId = req.user.sub;
     return this.branchesService.generateQr(id, userId);

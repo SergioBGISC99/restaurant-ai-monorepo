@@ -8,6 +8,7 @@ import { BranchesModule } from './branches/branches.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ProductsModule } from './products/products.module';
+import { OrdersModule } from './orders/orders.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -21,6 +22,7 @@ import { ProductsModule } from './products/products.module';
     AssistantsModule,
     BranchesModule,
     ProductsModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [],
