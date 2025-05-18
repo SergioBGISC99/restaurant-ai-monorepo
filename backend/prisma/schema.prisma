@@ -57,14 +57,15 @@ model Product {
 }
 
 model Order {
-    id        String      @id @default(uuid())
-    branch    Branch      @relation(fields: [branchId], references: [id])
-    branchId  String
-    userPhone String
-    userName  String
-    items     OrderItem[]
-    status    OrderStatus @default(PENDING)
-    createdAt DateTime    @default(now())
+    id             String      @id @default(uuid())
+    branch         Branch      @relation(fields: [branchId], references: [id])
+    branchId       String
+    userPhone      String
+    userName       String
+    items          OrderItem[]
+    status         OrderStatus @default(PENDING)
+    openaiThreadId String?
+    createdAt      DateTime    @default(now())
 }
 
 model OrderItem {

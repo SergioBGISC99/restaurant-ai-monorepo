@@ -7,10 +7,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AddItemDto } from './dto/add-item.dto';
 import { OrderStatus } from '@prisma/client';
+import { OpenAiAssitantService } from 'src/openai/openai-assistant.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private openai: OpenAiAssitantService,
+  ) {}
 
   async create(dto: CreateOrderDto, userId: string) {
     const branch = await this.prisma.branch.findUnique({
@@ -21,13 +25,23 @@ export class OrdersService {
       throw new ForbiddenException('No autorizado para esta sucursal');
     }
 
-    return this.prisma.order.create({
+    const { threadId, messages } = await this.openai.processNewConversation(
+      `Hola soy ${dto.userName} y me gustaría hacer un pedido.`,
+    );
+
+    const order = await this.prisma.order.create({
       data: {
         userName: dto.userName,
         userPhone: dto.userPhone,
         branchId: dto.branchId,
+        openaiThreadId: threadId,
       },
     });
+
+    return {
+      order,
+      assistantmMessages: messages,
+    };
   }
 
   async addItem(dto: AddItemDto, orderId: string) {
