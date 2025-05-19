@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -8,6 +9,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { AddItemDto } from './dto/add-item.dto';
 import { OrderStatus } from '@prisma/client';
 import { OpenAiAssitantService } from 'src/openai/openai-assistant.service';
+import { parseProductsFromMessages } from 'src/openai/utils/parse-products-from-message';
 
 @Injectable()
 export class OrdersService {
@@ -29,6 +31,8 @@ export class OrdersService {
       `Hola soy ${dto.userName} y me gustaría hacer un pedido.`,
     );
 
+    const items = await this.validateProductsFromMessages(branch.id, messages);
+
     const order = await this.prisma.order.create({
       data: {
         userName: dto.userName,
@@ -41,6 +45,7 @@ export class OrdersService {
     return {
       order,
       assistantmMessages: messages,
+      threadId,
     };
   }
 
@@ -80,5 +85,26 @@ export class OrdersService {
       where: { id: orderId },
       data: { status },
     });
+  }
+
+  async validateProductsFromMessages(branchId: string, messages: string[]) {
+    const availableProducts = await this.prisma.product.findMany({
+      where: {
+        branchId,
+        isActive: true,
+      },
+    });
+
+    if (!availableProducts.length) {
+      throw new Error('No hay productos disponibles en esta sucursal.');
+    }
+
+    const parsed = parseProductsFromMessages(messages, availableProducts);
+
+    if (!parsed.length) {
+      throw new Error('No se identificaron productos válidos en el mensaje.');
+    }
+
+    return parsed;
   }
 }
